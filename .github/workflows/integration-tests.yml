@@ -26,7 +26,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       with:
         repository: aws/aws-durable-execution-sdk-python-testing
-        path: testing-sdk
+        path: language-sdk/packages/testing-sdk
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -40,13 +40,13 @@ jobs:
       working-directory: language-sdk
       run: |
         echo "Running SDK tests..."
-        hatch run -- test:pip install -e ../testing-sdk
-        hatch run -- test:pip install -e ../language-sdk
-        hatch fmt --check
+        hatch run -- test:pip install -e packages/testing-sdk
         hatch run types:check
         hatch run test:cov
-        hatch run test:examples
-        hatch build
+
+    - name: Verify package build
+      working-directory: language-sdk/packages/aws-durable-execution-sdk-python
+      run: hatch build
 
   e2e-tests:
     needs: integration-tests
@@ -65,7 +65,7 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       with:
         repository: aws/aws-durable-execution-sdk-python-testing
-        path: testing-sdk
+        path: language-sdk/packages/testing-sdk
 
     - name: Set up Python 3.13
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -84,7 +84,7 @@ jobs:
 
     - name: Get integration examples
       id: get-examples
-      working-directory: language-sdk/examples
+      working-directory: language-sdk/packages/aws-durable-execution-sdk-python-examples
       run: |
         echo "examples=$(jq -c '.examples | map(select(.integration == true)) | .[0:2]' examples-catalog.json)" >> $GITHUB_OUTPUT
 
@@ -97,7 +97,7 @@ jobs:
         rm -rf /tmp/aws/
 
     - name: Deploy and test examples
-      working-directory: language-sdk
+      working-directory: language-sdk/packages/aws-durable-execution-sdk-python-examples
       env:
         AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         LAMBDA_ENDPOINT: "https://lambda.us-west-2.amazonaws.com"
