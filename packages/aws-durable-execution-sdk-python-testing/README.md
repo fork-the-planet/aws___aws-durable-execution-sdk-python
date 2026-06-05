@@ -112,10 +112,10 @@ def test_my_durable_functions():
     assert three_result.result == '"5 6"'
 ```
 ## Architecture
-![Durable Functions Python Test Framework Architecture](/assets/dar-python-test-framework-architecture.svg)
+![Durable Functions Python Test Framework Architecture](assets/dar-python-test-framework-architecture.svg)
 
 ## Event Flow
-![Event Flow Sequence Diagram](/assets/dar-python-test-framework-event-flow.svg)
+![Event Flow Sequence Diagram](assets/dar-python-test-framework-event-flow.svg)
 
 1. **DurableTestRunner** starts execution via **Executor**
 2. **Executor** creates **Execution** and schedules initial invocation
