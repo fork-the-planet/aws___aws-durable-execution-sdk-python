@@ -4338,14 +4338,14 @@ def test_emit_operation_replay_hook_fires_start_and_end_for_terminal_operation()
         sub_type=OperationSubType.STEP,
         step_details=StepDetails(attempt=1, result='"done"'),
     )
-    captured: list[tuple[str, str, bool]] = []
+    captured: list[tuple[str, str, bool, OperationStatus]] = []
 
     class _CapturingPlugin(DurableInstrumentationPlugin):
         def on_operation_start(self, info):
-            captured.append(("start", info.operation_id, info.is_replayed))
+            captured.append(("start", info.operation_id, info.is_replayed, info.status))
 
         def on_operation_end(self, info):
-            captured.append(("end", info.operation_id, info.is_replayed))
+            captured.append(("end", info.operation_id, info.is_replayed, info.status))
 
     plugin_executor = PluginExecutor(plugins=[_CapturingPlugin()])
     with plugin_executor.run():
@@ -4362,8 +4362,8 @@ def test_emit_operation_replay_hook_fires_start_and_end_for_terminal_operation()
         state.emit_operation_replay_hook(operation)
 
     assert captured == [
-        ("start", "step-1", True),
-        ("end", "step-1", True),
+        ("start", "step-1", True, OperationStatus.SUCCEEDED),
+        ("end", "step-1", True, OperationStatus.SUCCEEDED),
     ]
 
 
@@ -4376,14 +4376,14 @@ def test_emit_operation_replay_hook_fires_only_start_for_non_terminal_operation(
         name="my-wait",
         sub_type=OperationSubType.WAIT,
     )
-    captured: list[tuple[str, str, bool]] = []
+    captured: list[tuple[str, str, bool, OperationStatus]] = []
 
     class _CapturingPlugin(DurableInstrumentationPlugin):
         def on_operation_start(self, info):
-            captured.append(("start", info.operation_id, info.is_replayed))
+            captured.append(("start", info.operation_id, info.is_replayed, info.status))
 
         def on_operation_end(self, info):
-            captured.append(("end", info.operation_id, info.is_replayed))
+            captured.append(("end", info.operation_id, info.is_replayed, info.status))
 
     plugin_executor = PluginExecutor(plugins=[_CapturingPlugin()])
     with plugin_executor.run():
@@ -4397,7 +4397,7 @@ def test_emit_operation_replay_hook_fires_only_start_for_non_terminal_operation(
 
         state.emit_operation_replay_hook(operation)
 
-    assert captured == [("start", "wait-1", True)]
+    assert captured == [("start", "wait-1", True, OperationStatus.STARTED)]
 
 
 def test_emit_operation_replay_hook_skips_execution_and_ready():
