@@ -45,6 +45,7 @@ def test_build_template_creates_lambda_log_group_with_seven_day_retention():
     }
     assert template["Resources"]["HelloWorld"]["DependsOn"] == ["HelloWorldLogGroup"]
     assert template["Resources"]["HelloWorld"]["Properties"]["LoggingConfig"] == {
+        "LogFormat": "JSON",
         "LogGroup": {"Ref": "HelloWorldLogGroup"},
     }
 

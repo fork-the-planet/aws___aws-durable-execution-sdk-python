@@ -7,6 +7,7 @@ from typing import Any
 
 
 DEFAULT_FUNCTION_NAME_PREFIX = "DurablePythonExample-"
+DEFAULT_DURABLE_LOGGING_CONFIG: dict[str, str] = {"LogFormat": "JSON"}
 LOG_RETENTION_DAYS = 7
 
 
@@ -78,8 +79,13 @@ def build_template(examples: list[dict[str, Any]]) -> dict[str, Any]:
 
         if "durableConfig" in example:
             properties["DurableConfig"] = example["durableConfig"]
+            logging_config: dict[str, Any] = dict(DEFAULT_DURABLE_LOGGING_CONFIG)
+        else:
+            logging_config = {}
 
-        logging_config: dict[str, Any] = dict(example.get("loggingConfig", {}))
+        if "loggingConfig" in example:
+            logging_config.update(example["loggingConfig"])
+
         logging_config["LogGroup"] = {"Ref": f"{logical_id}LogGroup"}
         properties["LoggingConfig"] = logging_config
 
